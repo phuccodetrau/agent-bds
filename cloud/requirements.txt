@@ -1,0 +1,3 @@
+google-cloud-storage
+confluent_kafka
+dotenv

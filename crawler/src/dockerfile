@@ -1,0 +1,48 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    gnupg \
+    unixodbc-dev \
+    build-essential \
+    default-jre \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+RUN apt-get update && apt-get install -y openjdk-11-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV SPARK_VERSION=3.4.1
+ENV HADOOP_VERSION=3
+RUN wget -q https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
+    && tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz -C /opt/ \
+    && mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/spark \
+    && rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
+
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+
+ENV AIRFLOW_HOME=/opt/airflow
+RUN mkdir -p $AIRFLOW_HOME
+
+ENV AIRFLOW_VERSION=2.9.0
+ENV CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.11.txt"
+RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+
+COPY crawlerbds /opt/crawlerbds
+
+COPY requirements.txt /opt/crawlerbds/requirements.txt
+RUN if [ -f /opt/crawlerbds/requirements.txt ]; then pip install --no-cache-dir -r /opt/crawlerbds/requirements.txt; fi
+
+RUN airflow db init
+
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+
+VOLUME /opt/airflow
+
+WORKDIR /opt/airflow
+
+EXPOSE 8080
+
+CMD ["airflow", "webserver", "--port", "8080"]

@@ -1,0 +1,124 @@
+version: '3'
+
+services:
+  spark-master:
+    build:
+      context: ./spark
+    container_name: spark-master
+    ports:
+      - "8081:8080"  # Đổi cổng để tránh xung đột với Airflow
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs
+    networks:
+      - spark-network
+
+  spark-worker-1:
+    build:
+      context: ./spark
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          memory: 1G
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+
+  spark-worker-2:
+    build:
+      context: ./spark
+    container_name: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    volumes:
+      - ./jobs:/opt/bitnami/spark/jobs
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          memory: 1G
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+
+  # spark-submit:
+  #   build:
+  #     context: ./spark
+  #   container_name: spark-submit
+  #   command: >
+  #     /bin/bash -c "
+  #     tail -f /dev/null"  # Giữ container chạy, chờ Airflow gọi
+  #   volumes:
+  #     - checkpoint:/tmp/checkpoint
+  #     - ./jobs:/opt/bitnami/spark/jobs
+  #   networks:
+  #     - spark-network
+  #   depends_on:
+  #     - spark-master
+  #     - spark-worker-1
+  #     - spark-worker-2
+
+  airflow:
+    build:
+      context: .
+    container_name: airflow
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow:/opt/airflow
+      - ./jobs:/opt/airflow/jobs
+      - ./spark/key.json:/app/key.json
+    environment:
+      - SPARK_CLASSPATH=/opt/bitnami/spark/jars/*
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
+      - spark.hadoop.fs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem
+      - spark.hadoop.fs.gs.auth.service.account.enable=true
+      - spark.hadoop.fs.gs.auth.service.account.json.keyfile=/app/key.json
+    command: airflow standalone
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+      # - spark-submit
+
+networks:
+  spark-network:
+    driver: bridge
+
+volumes:
+  checkpoint:
+    driver: local

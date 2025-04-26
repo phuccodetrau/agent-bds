@@ -1,0 +1,17 @@
+# Sử dụng Python 3.11.11 làm base image
+FROM python:3.11.11
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# Copy toàn bộ mã nguồn vào container
+COPY . .
+
+# Cài đặt các dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Mở port cho FastAPI (8000) và Celery worker
+EXPOSE 8000
+
+# Lệnh mặc định chạy FastAPI
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
