@@ -38,7 +38,6 @@ class BdsSpiderSpider(scrapy.Spider):
 
     def parse_home_page(self, response):
 
-        # Discover real estate page for each province
         province_page_links = response.css('ul.list-menu-nhadat-service li h3 a::attr(href)').getall()
 
         for province_page_link in province_page_links:
@@ -67,13 +66,11 @@ class BdsSpiderSpider(scrapy.Spider):
             yield scrapy.Request(url=self._get_page_url(province=province, page_num=dest_page_num), callback=self.parse_province_page, meta={'province': province, 'page': dest_page_num})
         else:
             if page >= self.min_page:
-                # Discover page links for province 's real estate
                 real_estates = response.css('div.item-nhadat')
                 for real_estate in real_estates:
                     real_estate_link = real_estate.css('a.title-item-nhadat::attr(href)').get()
                     yield scrapy.Request(url=real_estate_link, callback=self.parse_real_estate_page, meta={'province': province})
 
-            # Go to next page
             if page == 1:
                 next_page = response.css('div.pagination.row-cl a.other-page::attr(href)')[0].get()
             else:

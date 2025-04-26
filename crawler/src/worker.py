@@ -32,7 +32,6 @@ def run_scrapy_crawler(min_page, max_page, province, jump_to_page, estate_type, 
 
     current_task.update_state(state="STARTED", meta={"message": "Task started..."})
 
-    # Lệnh chạy Scrapy
     command_1 = [
         "scrapy", "crawl", spider_name_1,
         "-a", f"min_page={min_page}",

@@ -43,7 +43,6 @@ class IBatdongsanSpider(scrapy.Spider):
 
     def parse_home_page(self, response):
 
-        # Discover real estate page for each province
         province_page_links = response.css('div.readmore-box ul li a::attr(href)').getall()
 
         for province_page_link in province_page_links:
@@ -64,7 +63,6 @@ class IBatdongsanSpider(scrapy.Spider):
                                  callback=self.parse_province_page, meta={'province': province, 'page': dest_page_num})
         else:
             if page >= self.min_page:
-                # Discover page links for province 's real estate
                 real_estates = response.css('div.prop-box-item-contain div div.div_prop_wapper.clearfix')
                 for real_estate in real_estates:
                     real_estate_link = real_estate.css('div.div_prop_info div h4 a::attr(href)').get()
@@ -72,7 +70,6 @@ class IBatdongsanSpider(scrapy.Spider):
                     yield scrapy.Request(url=real_estate_link, callback=self.parse_real_estate_page,
                                          meta={'province': province})
 
-            # Go to next page
             page_links = response.css('div.paging div div div ul li a::attr(href)').getall()[1:-1]
             page_numbers = [page_link.split("pg=")[-1] for page_link in page_links]
             current_page = response.css('div.paging div div div ul li.active span::text').get()
