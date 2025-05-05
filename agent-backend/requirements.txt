@@ -9,3 +9,7 @@ openai-agents
 rich
 fastapi
 uvicorn
+langfuse
+pydantic-ai[logfire]
+nest_asyncio
+datasets

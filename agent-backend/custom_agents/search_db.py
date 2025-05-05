@@ -234,7 +234,7 @@ tool_strict = FunctionTool(
 database_search_agent = Agent(
     name="The agent searching real estate posts from database",
     model="gpt-4o-mini",
-    instructions=f"You are a real estate searching agent. You will be given an input in Vietnamese and you must response in Vietnamese. Return exactly posts from any tool used without independently filtering or editing the information",
+    instructions=f"You are a real estate searching agent. You will be given an input in Vietnamese and you must response in Vietnamese. Return exactly posts from any tool used without independently filtering or editing the information. If there is any feedback provided, use it to improve the search.",
     tools=[tool, tool_strict],
     output_type= ListPosts,
     model_settings=ModelSettings(tool_choice="required")

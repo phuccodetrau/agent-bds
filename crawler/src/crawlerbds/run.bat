@@ -7,11 +7,11 @@ set "min_page=1"
 set "max_page=25"
 set "province=ha-noi"
 set "jump_to_page=1"
-set "estate_type=2"
+set "estate_type=330"
 
 :: Kafka parameters
 set "kafka_bootstrap_servers=34.171.201.34:9192,34.171.201.34:9292,34.171.201.34:9392"
-set "kafka_topic=chungcu_batch"
+set "kafka_topic=nharieng_batch"
 
 :: Run crawler
 scrapy crawl %spider_name% ^

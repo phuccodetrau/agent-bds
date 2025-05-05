@@ -11,6 +11,7 @@ from custom_agents.planner import planner_agent
 from custom_agents.search_db import Post, ListPosts, database_search_agent
 from custom_agents.search_web import search_agent
 from custom_agents.bds_writer import RealEstateAdvice, writer_agent
+from custom_agents.judge_agent import evaluator
 from printer import Printer
 import json
 from typing import Any
@@ -45,7 +46,7 @@ class ResearchManager:
             if "search_web" in tool_choices:
                 findings = await self._perform_searches(query)
 
-            report = await self._write_report(posts, findings)
+            report = await self._write_report(query, posts, findings)
 
             final_report = f"Findings\n\n{report.real_estate_findings}"
             self.printer.update_item("final_report", final_report, is_done=True)
@@ -65,8 +66,24 @@ class ResearchManager:
 
     async def _perform_search_db(self, query) -> ListPosts:
         with custom_span("Search the database"):
-            result = await Runner.run(database_search_agent, query)
-            return result.final_output_as(ListPosts)
+            input_items = [{"content": query, "role": "user"}]
+            posts = []
+            for i in range(3):
+                result = await Runner.run(database_search_agent, input_items)
+                posts = result.final_output_as(ListPosts)
+                input_items = result.to_input_list()
+                print("Searched posts")
+                evaluator_result = await Runner.run(evaluator, input_items)
+                eval_result = evaluator_result.final_output
+                print(f"Evaluation score: {eval_result.score}")
+                if eval_result.score == "pass":
+                    print("Done search_db")
+                    break
+
+                print("Re-running with feedback")
+                input_items.append({"content": f"Feedback: {eval_result.feedback}", "role": "user"})
+            return posts
+
 
     async def _perform_search_web(self, query) -> str:
         with custom_span("Search the web"):

@@ -16,7 +16,7 @@ The repository is structured into modular components, each handling a specific p
 - **airflow/**: An Apache Airflow setup with a DAG to schedule data collection (at 12 PM and 12 AM daily). It triggers the crawler, then submits a Spark job to process data from GCS and index it into Elasticsearch.
 - **spark/**: A utility module for testing data processing and connectivity between GCS and Elasticsearch.
 - **elasticsearch/**: An Elasticsearch cluster with Kibana for indexing, searching, and visualizing real estate data.
-- **agent-bds/**: The backend for the LLM agent system, powered by a prompt-chaining pattern with five agents:
+- **agent-backend/**: The backend for the LLM agent system, powered by a prompt-chaining pattern with five agents:
   - **Search Database Agent**: Queries Elasticsearch for relevant listings based on user input.
   - **Search Web Agent**: Searches the web for additional insights (e.g., market trends) not available in the database.
   - **Manager Agent**: Decides which of the above agents to delegate tasks to.
@@ -110,11 +110,6 @@ Once the pipeline is up and running, you can start the application services:
 - **Backend**: Python (LLM agents with prompt chaining)
 - **Frontend**: Custom UI (framework not specified)
 
----
-
-## 🌟 Why This Project?
-
-This project showcases a **full-stack data pipeline** integrated with an **AI-powered application**, making it a great example of modern data engineering and AI-driven user experiences. It’s designed to be scalable, modular, and easy to extend for other use cases.
 
 ---
 
@@ -124,14 +119,3 @@ This project showcases a **full-stack data pipeline** integrated with an **AI-po
 - Ensure proper configuration of GCS credentials and Elasticsearch settings before running the pipeline.
 - The Airflow DAG runs at 12 PM and 12 AM daily—adjust the schedule as needed.
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please fork the repository, create a feature branch, and submit a pull request with your changes.
-
----
-
-## 📧 Contact
-
-For questions or suggestions, feel free to open an issue on this repository.

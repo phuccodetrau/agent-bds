@@ -4,14 +4,14 @@ setlocal
 :: Crawler parameters
 set "spider_name=bds68_spider"
 set "min_page=1"
-set "max_page=25"
+set "max_page=100"
 set "province=ha-noi"
 set "jump_to_page=1"
-set "estate_type=3"
+set "estate_type=0"
 
 :: Kafka parameters
 set "kafka_bootstrap_servers=34.171.201.34:9192,34.171.201.34:9292,34.171.201.34:9392"
-set "kafka_topic=bietthu_batch"
+set "kafka_topic=nhapho_batch"
 
 :: Run crawler
 scrapy crawl %spider_name% ^

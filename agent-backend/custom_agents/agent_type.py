@@ -1,6 +1,10 @@
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
+class EvaluationFeedback(BaseModel):
+    feedback: str
+    score: Literal["pass", "needs_improvement"]
+
 class FunctionArgs(BaseModel):
     estate_type: List[Literal["nhà phố", "nhà riêng", "chung cư", "biệt thự"]] = Field(
         ..., description="Danh sách các loại bất động sản"
